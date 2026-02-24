@@ -1,0 +1,12 @@
+# Ignore Python cache folders
+**/__pycache__
+
+# Ignore virtual environment folder
+**/.venv
+
+# Ignore datasets
+**/datasets
+
+# Ignore Mac DS_Store files
+.DS_Store
+**/.DS_Store
