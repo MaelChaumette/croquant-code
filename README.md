@@ -1,6 +1,6 @@
 # Code for reproducible research - "CROQuant: Complex Rank-One Quantization Algorithm, with Application to Butterfly Factorizations"
 
-In the interest of reproducible research, we provide code to reproduce experiments in "CROQuant: Complex Rank-One Quantization Algorithm, with Application to Butterfly Factorizations" (Maël Chaumette, Rémi Gribonval, Elisa Riccietti).
+In the interest of reproducible research, we provide code to reproduce experiments in "[CROQuant: Complex Rank-One Quantization Algorithm, with Application to Butterfly Factorizations](https://hal.science/hal-05520926)" (Maël Chaumette, Rémi Gribonval, Elisa Riccietti).
 
 ## Getting started
 Follow these steps to set up the project environment:
@@ -212,6 +212,18 @@ To reproduce these additional results by recomputing the results from scratch, y
 ## License
 BSD 3-Clause License
 
-<!-- ## Citation
+## Citation
 ```
-``` -->
+@unpublished{chaumette:hal-05520926,
+  TITLE = {{CROQuant: Complex Rank-One Quantization Algorithm, with Application to Butterfly Factorizations}},
+  AUTHOR = {Chaumette, Ma{\"e}l and Gribonval, R{\'e}mi and Riccietti, Elisa},
+  URL = {https://hal.science/hal-05520926},
+  NOTE = {working paper or preprint},
+  YEAR = {2026},
+  MONTH = Feb,
+  KEYWORDS = {Low-precision Quantization ; Rank-One matrices ; Butterfly matrices ; Fast Fourier transform ; Discrete optimization ; Computations on matrices},
+  PDF = {https://hal.science/hal-05520926v1/file/croquant.pdf},
+  HAL_ID = {hal-05520926},
+  HAL_VERSION = {v1},
+}
+```
