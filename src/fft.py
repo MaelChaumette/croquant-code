@@ -1,7 +1,6 @@
 import numpy as np
 from scipy.sparse import csr_matrix
 
-
 from lazylinop.butterfly import ksm
 
 
