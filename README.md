@@ -210,7 +210,7 @@ To reproduce these additional results by recomputing the results from scratch, y
  - For the evolution in terms of `delta`: 4 minutes for all `n` and `delta` values per point, resulting in **7 hours** for 100 points.
 
 ## License
-BSD 3-Clause License
+CROQuant is released under the [Creative Commons Attribution 4.0 International (CC BY 4.0)](LICENSE) license.
 
 ## Citation
 ```
