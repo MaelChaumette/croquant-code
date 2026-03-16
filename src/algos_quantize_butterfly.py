@@ -157,20 +157,21 @@ def butterfly_quantize_rtl(butterflies, t, delta=2):
 
         return result
 
-    X = product(butterflies[:-1])
-    Y = butterflies[-1]
+    X = product(butterflies[:-1]).toarray()
+    Y = butterflies[-1].toarray()
 
     for l in range(1, len(butterflies) - 1):
         _, Y_hat, Lbd, _ = find_optim_product_complex(
             X, Y.conj().T, np.inf, t, delta)
 
-        quantized_butterflies.append(Y_hat.conj().T)
+        quantized_butterflies.append(csr_matrix(Y_hat).getH())
 
-        X = product(butterflies[:-(l + 1)])
-        Y = butterflies[-(l + 1)] * Lbd
+        X = product(butterflies[:-(l + 1)]).toarray()
+        Y = butterflies[-(l + 1)].toarray() * Lbd
 
-    X_hat, Y_hat, _, _ = find_optim_product_complex(X, Y.conj().T, t, t, delta)
-    quantized_butterflies.extend([Y_hat.conj().T, X_hat])
+    X_hat, Y_hat, _, _ = find_optim_product_complex(
+        csr_matrix(X), csr_matrix(Y).getH(), t, t, delta)
+    quantized_butterflies.extend([csr_matrix(Y_hat).getH(), csr_matrix(X_hat)])
 
     return reversed(quantized_butterflies)
 

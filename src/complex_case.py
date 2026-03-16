@@ -184,13 +184,11 @@ def generate_midpoints(t, e_max, e_min):
     e_min: Minimum value of e for tractability.
         int
     """
-    betas = []
-    for k in range(2**(t - 1), 2**t):
-        for e in range(e_min, e_max + 1):
-            beta = (k + 1 / 2) * 2**(e - t)
-            betas.append(beta)
-
-    return betas
+    return [
+        (k + 0.5) * 2**(e - t)
+        for k in range(2**(t - 1), 2**t)
+        for e in range(e_min, e_max + 1)
+    ]
 
 
 def generate_directions(x):
@@ -207,15 +205,9 @@ def generate_directions(x):
     list of directions of x
         list[complex]
     """
-    zs = []
-    for l in [0, 1]:
-        for xj in x:
-            if xj == 0:
-                continue
+    x_nz = x[x != 0]
 
-            zs.append((1j)**l * xj)
-
-    return zs
+    return np.concat(((1j)**0 * x_nz, (1j)**1 * x_nz), axis=0)
 
 
 def normalize_direction_set(direction_set):
@@ -232,12 +224,10 @@ def normalize_direction_set(direction_set):
     list of normalized complex numbers
         list[complex]
     """
-    normalized_set = []
-    for z in direction_set:
-        z_new = z / (2 ** np.floor(np.log2(np.abs(z))))
-        normalized_set.append(z_new)
-
-    return normalized_set
+    return [
+        z / (2 ** np.floor(np.log2(np.abs(z))))
+        for z in direction_set
+    ]
 
 
 def from_direction_midpoints_to_breaklines(direction_set, midpoint_set):
@@ -280,49 +270,6 @@ def from_direction_midpoints_to_breaklines(direction_set, midpoint_set):
         all_breaklines.append(breaklines)
 
     return all_breaklines
-
-
-def find_e_min(direction_set, t, border):
-    r"""
-    Finds the smallest e such that the set of stable regions is empty.
-
-    Parameters
-    ----------
-    direction_set: list of directions of x
-        list[complex]
-    t: Number of bits for quantization.
-        int
-    border: Tiling domain
-        TilingDomain
-
-    Returns
-    -------
-    The smallest e value.
-        int
-    """
-    e = 0
-
-    midpoint_set = generate_midpoints(t, e, e)
-    polygons_stable = get_polygons(direction_set, midpoint_set, border)
-    if len(polygons_stable) > 0:
-        direction = 1
-    else:
-        direction = -1
-
-    while True:
-        if len(polygons_stable) > 0:
-            if direction == -1:
-                return e + 1
-
-            e += 1
-        else:
-            if direction == 1:
-                return e
-
-            e -= 1
-
-        midpoint_set = generate_midpoints(t, e, e)
-        polygons_stable = get_polygons(direction_set, midpoint_set, border)
 
 
 def find_e_max(direction_set, t, border):
@@ -372,6 +319,90 @@ def find_e_max(direction_set, t, border):
             direction_set, midpoint_set)
         breaklines_in_border = sum(
             border.filter_all_breaklines(breaklines), [])
+
+
+def find_e_min(normalized_direction_set, t, border):
+    r"""
+    Finds the smallest e such that the set of stable regions is empty.
+
+    Parameters
+    ----------
+    direction_set: list of directions of x
+        list[complex]
+    t: Number of bits for quantization.
+        int
+    border: Tiling domain
+        TilingDomain
+
+    Returns
+    -------
+    The smallest e value.
+        int
+    """
+    def is_covered(e, normalized_direction_set, t, polygon_border):
+        r"""
+        Checks if the border is covered by the accumulation polygons associated to the directions in normalized_direction_set.
+
+        Parameters
+        ----------
+        normalized_direction_set: list of normalized directions of x
+            list[complex]
+        t: number of bits for quantization
+            int
+        border: Tiling domain
+            TilingDomain
+
+        Returns
+        -------
+        True if the border is covered, False otherwise.
+            bool
+        """
+        accum_polygons = []
+        for z in normalized_direction_set:
+            if z == 0:
+                continue
+
+            y_vals = np.linspace(-100, 100, 2)
+            base_line = LineString([(0, y_vals[0]), (0, y_vals[1])])
+            accum_line = rotate(
+                base_line, -np.degrees(np.angle(z)), origin=(0, 0))
+
+            beta_min = (2**t + 1) * 2**(e-t - 1)
+
+            if np.imag(z) == 0:
+                dist = beta_min / np.real(z)
+            else:
+                dist = beta_min * np.sin(np.angle(z)) / np.imag(z)
+
+            accum_polygons.append(accum_line.buffer(dist))
+
+        union_accum_polygons = unary_union(accum_polygons)
+        return polygon_border.difference(union_accum_polygons).is_empty
+
+    e = 0
+
+    polygon_border = border.border
+
+    covered = is_covered(e, normalized_direction_set, t, polygon_border)
+
+    if covered:
+        direction = -1
+    else:
+        direction = 1
+
+    while True:
+        if covered:
+            if direction == 1:
+                return e
+
+            e -= 1
+        else:
+            if direction == -1:
+                return e + 1
+
+            e += 1
+
+        covered = is_covered(e, normalized_direction_set, t, polygon_border)
 
 
 def get_polygons(normalized_direction_set, midpoint_set, border):

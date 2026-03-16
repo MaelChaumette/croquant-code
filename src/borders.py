@@ -197,7 +197,7 @@ class Ring:
         i3 = np.where(x > 0)[0]
         i4 = np.where(x < ring_outer)[0]
         i5 = np.where(x**2 + y**2 < ring_outer**2)[0]
-        i6 = np.where(x**2 + y**2 > ring_inner)[0]
+        i6 = np.where(x**2 + y**2 > ring_inner**2)[0]
 
         i12 = np.intersect1d(i1, i2)
         i34 = np.intersect1d(i3, i4)
